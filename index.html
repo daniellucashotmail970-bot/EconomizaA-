@@ -1,72 +1,111 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Comparador de Preços Online</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Comparador de Preços</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    * {
       margin: 0;
-      background: #f4f6f8;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
     }
+
+    body {
+      background: #f5f5f5;
+      color: #333;
+    }
+
     header {
-      background: #1e88e5;
-      color: #fff;
+      background: #ffcc00;
       padding: 20px;
       text-align: center;
     }
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 20px;
+
+    header h1 {
+      color: #333;
+      margin-bottom: 10px;
     }
-    .search {
-      margin-bottom: 20px;
+
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
     }
-    .search input {
-      width: 100%;
+
+    .search-box input {
+      flex: 1;
       padding: 12px;
+      border: none;
+      outline: none;
       font-size: 16px;
     }
+
+    .search-box button {
+      padding: 12px 20px;
+      border: none;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+
     .product {
       background: #fff;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 15px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+
     .product h2 {
-      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 20px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+
+    .prices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    th, td {
+
+    .store {
+      border: 1px solid #ddd;
+      border-radius: 6px;
       padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
+      flex: 1;
+      min-width: 180px;
     }
-    th {
-      background: #f0f0f0;
+
+    .store strong {
+      display: block;
+      margin-bottom: 5px;
     }
-    .best {
-      color: green;
-      font-weight: bold;
-    }
-    .btn {
-      background: #1e88e5;
-      color: #fff;
-      padding: 8px 12px;
+
+    .store a {
+      display: inline-block;
+      margin-top: 5px;
       text-decoration: none;
+      color: #fff;
+      background: #28a745;
+      padding: 6px 10px;
       border-radius: 4px;
+      font-size: 14px;
     }
+
     footer {
       text-align: center;
-      font-size: 14px;
       padding: 20px;
-      color: #555;
+      background: #333;
+      color: #fff;
+      margin-top: 40px;
     }
   </style>
 </head>
@@ -74,71 +113,86 @@
 
 <header>
   <h1>Comparador de Preços</h1>
-  <p>Compare preços das melhores lojas online. Não vendemos nem entregamos produtos.</p>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Buscar produto...">
+    <button onclick="searchProduct()">Buscar</button>
+  </div>
 </header>
 
-<div class="container">
-
-  <div class="search">
-    <input type="text" id="searchInput" placeholder="Buscar produto..." onkeyup="filterProducts()" />
-  </div>
-
-  <div class="product" data-name="iphone 14">
-    <h2>iPhone 14</h2>
-    <table>
-      <tr>
-        <th>Loja</th>
-        <th>Preço</th>
-        <th>Link</th>
-      </tr>
-      <tr>
-        <td>Loja A</td>
-        <td class="best">R$ 4.299,00</td>
-        <td><a class="btn" href="#" target="_blank">Ir para loja</a></td>
-      </tr>
-      <tr>
-        <td>Loja B</td>
-        <td>R$ 4.499,00</td>
-        <td><a class="btn" href="#" target="_blank">Ir para loja</a></td>
-      </tr>
-    </table>
-  </div>
-
-  <div class="product" data-name="notebook dell">
-    <h2>Notebook Dell Inspiron</h2>
-    <table>
-      <tr>
-        <th>Loja</th>
-        <th>Preço</th>
-        <th>Link</th>
-      </tr>
-      <tr>
-        <td>Loja C</td>
-        <td class="best">R$ 3.199,00</td>
-        <td><a class="btn" href="#" target="_blank">Ir para loja</a></td>
-      </tr>
-      <tr>
-        <td>Loja D</td>
-        <td>R$ 3.350,00</td>
-        <td><a class="btn" href="#" target="_blank">Ir para loja</a></td>
-      </tr>
-    </table>
-  </div>
-
-</div>
+<main id="results"></main>
 
 <footer>
-  <p>Este site é apenas um comparador de preços. Não realizamos vendas, entregas ou garantias.</p>
+  © 2026 - Comparador de Preços
 </footer>
 
 <script>
-  function filterProducts() {
-    const input = document.getElementById('searchInput').value.toLowerCase();
-    const products = document.querySelectorAll('.product');
+  const products = [
+    {
+      name: "iPhone 13 128GB",
+      prices: [
+        { store: "Loja A", price: 3899, link: "#" },
+        { store: "Loja B", price: 3799, link: "#" },
+        { store: "Loja C", price: 3999, link: "#" }
+      ]
+    },
+    {
+      name: "Smart TV 50\" 4K",
+      prices: [
+        { store: "Loja A", price: 2499, link: "#" },
+        { store: "Loja B", price: 2399, link: "#" },
+        { store: "Loja C", price: 2599, link: "#" }
+      ]
+    },
+    {
+      name: "Notebook Ryzen 5",
+      prices: [
+        { store: "Loja A", price: 3299, link: "#" },
+        { store: "Loja B", price: 3199, link: "#" },
+        { store: "Loja C", price: 3399, link: "#" }
+      ]
+    }
+  ];
 
-    products.forEach(product => {
-      const name = product.getAttribute('data-name');
-      product.style.display = name.includes(input) ? 'block' : 'none';
+  function searchProduct() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+      results.innerHTML = "<p>Nenhum produto encontrado.</p>";
+      return;
+    }
+
+    filtered.forEach(product => {
+      product.prices.sort((a, b) => a.price - b.price);
+
+      const productDiv = document.createElement("div");
+      productDiv.className = "product";
+
+      let pricesHTML = "";
+      product.prices.forEach(p => {
+        pricesHTML += `
+          <div class="store">
+            <strong>${p.store}</strong>
+            R$ ${p.price.toLocaleString("pt-BR")}
+            <br>
+            <a href="${p.link}" target="_blank">Ir para loja</a>
+          </div>
+        `;
+      });
+
+      productDiv.innerHTML = `
+        <h2>${product.name}</h2>
+        <div class="prices">
+          ${pricesHTML}
+        </div>
+      `;
+
+      results.appendChild(productDiv);
     });
   }
 </script>
